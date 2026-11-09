@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Все тесты (xUnit)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-tests",
+            "program": "${workspaceFolder}/LinearAlgebra.Tests/bin/Debug/net10.0/LinearAlgebra.Tests.dll",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "osx": {
+                "env": {
+                    "DOTNET_ROOT": "${env:HOME}/.dotnet",
+                    "PATH": "${env:HOME}/.dotnet:${env:PATH}"
+                }
+            }
+        },
+        {
+            "name": "Демо (VectorDemo)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-demo",
+            "program": "${workspaceFolder}/VectorDemo/bin/Debug/net10.0/VectorDemo.dll",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "osx": {
+                "env": {
+                    "DOTNET_ROOT": "${env:HOME}/.dotnet",
+                    "PATH": "${env:HOME}/.dotnet:${env:PATH}"
+                }
+            }
+        }
+    ]
+}

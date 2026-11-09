@@ -81,7 +81,6 @@ namespace LinearAlgebra
                     return 0;
                 }
 
-                // Масштабирование сохраняет представимую норму при больших и малых координатах.
                 double sum = 0;
                 foreach (double coordinate in _coordinates)
                 {
@@ -164,6 +163,8 @@ namespace LinearAlgebra
             return ApplyVector(vector, (left, right) => left - right).Length;
         }
 
+        // ===== Перегрузка операторов =====
+
         /// <summary>Покомпонентное сложение с числом.</summary>
         public static IMathVector operator +(MathVector left, double number)
         {
@@ -227,6 +228,8 @@ namespace LinearAlgebra
             return left.ScalarMultiply(right);
         }
 
+        // ===== Вспомогательные методы =====
+
         private IMathVector ApplyNumber(double number, Func<double, double, double> operation)
         {
             ValidateNumber(number);
@@ -277,6 +280,8 @@ namespace LinearAlgebra
 
             return coordinates;
         }
+
+        // ===== Валидаторы =====
 
         private static void ValidateNumber(double number)
         {
