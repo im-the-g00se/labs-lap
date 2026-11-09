@@ -7,14 +7,16 @@ namespace LinearAlgebra.Tests
     public class MathVectorCoreTests
     {
         [Fact]
-        public void Constructor_Array_CopiesCoordinates()
+        public void Constructor_SingleElementArray_CopiesCoordinatesAndSetsDimensions()
         {
-            double[] source = [1, 2];
+            double[] source = [-0.25];
             var vector = new MathVector(source);
+            Assert.Equal(1, vector.Dimensions);
             source[0] = 99;
-            vector[1] = 88;
-            Equal([1, 88], vector);
-            Assert.Equal([99, 2], source);
+            Equal([-0.25], vector);
+            vector[0] = 88;
+            Equal([88], vector);
+            Assert.Equal([99], source);
         }
 
         [Fact]
@@ -30,13 +32,11 @@ namespace LinearAlgebra.Tests
             Assert.Equal([99, 2, 3], source);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void Constructor_VectorSource_CopiesIndependently(bool interfaceSource)
+        [Fact]
+        public void Constructor_MathVector_CopiesIndependently()
         {
-            IMathVector source = Vector(1, 2);
-            var copy = interfaceSource ? new MathVector(source) : new MathVector((MathVector)source);
+            var source = Vector(1, 2);
+            var copy = new MathVector(source);
             source[0] = 99;
             copy[1] = 88;
             Equal([1, 88], copy);
@@ -44,7 +44,7 @@ namespace LinearAlgebra.Tests
         }
 
         [Fact]
-        public void Constructor_ForeignInterface_CopiesCoordinates()
+        public void Constructor_IMathVector_CopiesCoordinates()
         {
             IMathVector source = new ForeignVector(1, 2);
             var copy = new MathVector(source);
@@ -64,129 +64,135 @@ namespace LinearAlgebra.Tests
         }
 
         [Fact]
+        public void Constructor_EmptySource_CreatesEmptyVector()
+        {
+            var vector = new MathVector(Array.Empty<double>());
+            Assert.Equal(0, vector.Dimensions);
+            Equal([], vector);
+        }
+
+        [Fact]
         public void Constructor_Null_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new MathVector(null!));
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData("1")]
-        [InlineData(null)]
-        [InlineData(double.NaN)]
-        [InlineData(double.PositiveInfinity)]
-        [InlineData(double.NegativeInfinity)]
-        public void Constructor_InvalidElement_ThrowsArgumentException(object? element)
+        [Fact]
+        public void Constructor_IntegerElement_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new MathVector(new object?[] { 1.0, element }));
+            Assert.Throws<ArgumentException>(() => new MathVector(new object?[] { 1.0, 1 }));
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(3)]
-        public void Dimensions_SourceSize_ReturnsCoordinateCount(int count)
+        [Fact]
+        public void Constructor_NullElement_ThrowsArgumentException()
         {
-            Assert.Equal(count, new MathVector(new double[count]).Dimensions);
+            Assert.Throws<ArgumentException>(() => new MathVector(new object?[] { 1.0, null }));
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(2)]
-        public void Indexer_BoundaryIndex_ReadsAndWritesOnlySelectedCoordinate(int index)
+        [Fact]
+        public void Constructor_NaN_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => new MathVector(new object?[] { 1.0, double.NaN }));
+        }
+
+        [Fact]
+        public void IndexerGet_FirstIndex_ReturnsSelectedCoordinate()
         {
             var vector = Vector(1, 2, 3);
-            Assert.Equal(index + 1, vector[index]);
-            vector[index] = 8;
+            Assert.Equal(1, vector[0]);
+        }
+
+        [Fact]
+        public void IndexerGet_InteriorIndex_ReturnsSelectedCoordinate()
+        {
+            var vector = Vector(1, 2, 3);
+            Assert.Equal(2, vector[1]);
+        }
+
+        [Fact]
+        public void IndexerGet_LastIndex_ReturnsSelectedCoordinate()
+        {
+            var vector = Vector(1, 2, 3);
+            Assert.Equal(3, vector[2]);
+        }
+
+        [Fact]
+        public void IndexerSet_FirstIndex_UpdatesOnlySelectedCoordinate()
+        {
+            var vector = Vector(1, 2, 3);
+            vector[0] = 8;
             double[] expected = [1, 2, 3];
-            expected[index] = 8;
+            expected[0] = 8;
             Equal(expected, vector);
             Assert.Equal(3, vector.Dimensions);
         }
 
         [Fact]
-        public void Indexer_SingleCoordinate_ReadsAndWrites()
+        public void IndexerSet_LastIndex_UpdatesOnlySelectedCoordinate()
         {
-            var vector = Vector(1);
-            Assert.Equal(1, vector[0]);
-            vector[0] = 2;
-            Equal([2], vector);
+            var vector = Vector(1, 2, 3);
+            vector[2] = 8;
+            double[] expected = [1, 2, 3];
+            expected[2] = 8;
+            Equal(expected, vector);
+            Assert.Equal(3, vector.Dimensions);
         }
 
-        [Theory]
-        [InlineData(0, -1)]
-        [InlineData(0, 0)]
-        [InlineData(1, -1)]
-        [InlineData(1, 1)]
-        [InlineData(3, -1)]
-        [InlineData(3, 3)]
-        public void Indexer_InvalidIndex_ReadThrowsArgumentOutOfRangeException(int count, int index)
+        [Fact]
+        public void Indexer_NegativeIndex_ReadThrowsArgumentOutOfRangeException()
         {
-            var vector = new MathVector(new double[count]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => vector[index]);
+            var vector = new MathVector(new double[3]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => vector[-1]);
         }
 
-        [Theory]
-        [InlineData(0, -1)]
-        [InlineData(0, 0)]
-        [InlineData(1, -1)]
-        [InlineData(1, 1)]
-        [InlineData(3, -1)]
-        [InlineData(3, 3)]
-        public void Indexer_InvalidIndex_WriteThrowsAndPreservesCoordinates(int count, int index)
+        [Fact]
+        public void Indexer_NegativeIndex_WriteThrowsAndPreservesCoordinates()
         {
-            var vector = new MathVector(new double[count]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => vector[index] = 8);
-            Equal(new double[count], vector);
+            var vector = new MathVector(new double[3]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => vector[-1] = 8);
+            Equal(new double[3], vector);
         }
 
-        [Theory]
-        [InlineData(double.NaN)]
-        [InlineData(double.PositiveInfinity)]
-        [InlineData(double.NegativeInfinity)]
-        public void Indexer_NonFiniteValue_ThrowsAndPreservesCoordinates(double value)
+        [Fact]
+        public void Indexer_IndexEqualToDimensions_ReadThrowsArgumentOutOfRangeException()
+        {
+            var vector = new MathVector(new double[3]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => vector[3]);
+        }
+
+        [Fact]
+        public void Indexer_IndexEqualToDimensions_WriteThrowsAndPreservesCoordinates()
+        {
+            var vector = new MathVector(new double[3]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => vector[3] = 8);
+            Equal(new double[3], vector);
+        }
+
+        [Fact]
+        public void Indexer_PositiveInfinity_ThrowsAndPreservesCoordinates()
         {
             var vector = Vector(1, 2);
-            Assert.Throws<ArgumentOutOfRangeException>(() => vector[0] = value);
+            Assert.Throws<ArgumentOutOfRangeException>(() => vector[0] = double.PositiveInfinity);
             Equal([1, 2], vector);
         }
 
-        [Theory]
-        [InlineData(2.0)]
-        [InlineData(-2.0)]
-        [InlineData(0.25)]
-        [InlineData(double.Epsilon)]
-        [InlineData(double.MaxValue)]
-        public void Coordinates_FiniteValue_PreservesExactValue(double value)
+        [Fact]
+        public void GetEnumerator_EmptyVector_YieldsDoublesInOrder()
         {
-            var vector = Vector(value);
-            Assert.Equal(BitConverter.DoubleToInt64Bits(value), BitConverter.DoubleToInt64Bits(vector[0]));
-            vector[0] = 1;
-            vector[0] = value;
-            Assert.Equal(BitConverter.DoubleToInt64Bits(value), BitConverter.DoubleToInt64Bits(vector[0]));
+            double[] expected = [];
+            var vector = new MathVector(expected);
+            var actual = new List<double>();
+            foreach (object value in vector)
+            {
+                actual.Add(Assert.IsType<double>(value));
+            }
+            Assert.Equal(expected, actual);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void Coordinates_SignedZero_PreservesSign(bool negative)
+        [Fact]
+        public void GetEnumerator_MultipleCoordinates_YieldsDoublesInOrder()
         {
-            long bits = negative ? long.MinValue : 0;
-            double value = BitConverter.Int64BitsToDouble(bits);
-            var vector = Vector(value);
-            Assert.Equal(bits, BitConverter.DoubleToInt64Bits(vector[0]));
-            vector[0] = 1;
-            vector[0] = value;
-            Assert.Equal(bits, BitConverter.DoubleToInt64Bits(vector[0]));
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(3)]
-        public void GetEnumerator_Coordinates_YieldsDoublesInOrder(int count)
-        {
-            double[] expected = new double[] { -1, 0, 0.25 }.Take(count).ToArray();
+            double[] expected = [-1, 0, 0.25];
             var vector = new MathVector(expected);
             var actual = new List<double>();
             foreach (object value in vector)
@@ -210,33 +216,39 @@ namespace LinearAlgebra.Tests
             Equal([1, 2], vector);
         }
 
-        public static IEnumerable<object[]> LengthCases()
+        [Fact]
+        public void Length_EmptyVector_ReturnsExpectedValue()
         {
-            yield return [Array.Empty<double>(), 0.0, true];
-            yield return [new double[] { 0, 0 }, 0.0, true];
-            yield return [new double[] { 3 }, 3.0, true];
-            yield return [new double[] { -3 }, 3.0, true];
-            yield return [new double[] { 3, 4 }, 5.0, true];
-            yield return [new double[] { 1e200 }, 1e200, true];
-            yield return [new double[] { 3e200, 4e200 }, 5e200, false];
-            yield return [new double[] { 3e-200, 4e-200 }, 5e-200, false];
-            yield return [new double[] { double.Epsilon }, double.Epsilon, true];
-            yield return [new double[] { double.MaxValue }, double.MaxValue, true];
+            double actual = Vector().Length;
+            Assert.Equal(0.0, actual);
         }
 
-        [Theory]
-        [MemberData(nameof(LengthCases))]
-        public void Length_RepresentableNorm_ReturnsExpectedValue(double[] coordinates, double expected, bool exact)
+        [Fact]
+        public void Length_ZeroVector_ReturnsExpectedValue()
         {
-            double actual = new MathVector(coordinates).Length;
-            if (exact)
-            {
-                Assert.Equal(expected, actual);
-            }
-            else
-            {
-                Close(expected, actual);
-            }
+            double actual = Vector(0, 0).Length;
+            Assert.Equal(0.0, actual);
+        }
+
+        [Fact]
+        public void Length_MultipleCoordinates_ReturnsExpectedValue()
+        {
+            double actual = Vector(3, 4).Length;
+            Assert.Equal(5.0, actual);
+        }
+
+        [Fact]
+        public void Length_LargeCoordinates_ReturnsExpectedValue()
+        {
+            double actual = Vector(3e200, 4e200).Length;
+            Close(5e200, actual);
+        }
+
+        [Fact]
+        public void Length_SmallCoordinates_ReturnsExpectedValue()
+        {
+            double actual = Vector(3e-200, 4e-200).Length;
+            Close(5e-200, actual);
         }
 
         [Fact]

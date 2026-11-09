@@ -3,46 +3,9 @@ using Xunit;
 
 namespace LinearAlgebra.Tests
 {
-    public enum ScalarOperation
-    {
-        SumNumber, MultiplyNumber, DivideNumber, Add, Subtract, Multiply, Divide
-    }
-
-    public enum VectorOperation
-    {
-        Sum, Multiply, Divide, Add, Subtract, Product, Quotient, ScalarMultiply, Remainder, Distance
-    }
-
     internal static class VectorTestSupport
     {
         internal static MathVector Vector(params double[] coordinates) => new(coordinates);
-
-        internal static IMathVector Apply(ScalarOperation operation, MathVector vector, double number) => operation switch
-        {
-            ScalarOperation.SumNumber => vector.SumNumber(number),
-            ScalarOperation.MultiplyNumber => vector.MultiplyNumber(number),
-            ScalarOperation.DivideNumber => vector.DivideNumber(number),
-            ScalarOperation.Add => vector + number,
-            ScalarOperation.Subtract => vector - number,
-            ScalarOperation.Multiply => vector * number,
-            ScalarOperation.Divide => vector / number,
-            _ => throw new ArgumentOutOfRangeException(nameof(operation))
-        };
-
-        internal static object Apply(VectorOperation operation, MathVector left, IMathVector right) => operation switch
-        {
-            VectorOperation.Sum => left.Sum(right),
-            VectorOperation.Multiply => left.Multiply(right),
-            VectorOperation.Divide => left.Divide(right),
-            VectorOperation.Add => left + right,
-            VectorOperation.Subtract => left - right,
-            VectorOperation.Product => left * right,
-            VectorOperation.Quotient => left / right,
-            VectorOperation.ScalarMultiply => left.ScalarMultiply(right),
-            VectorOperation.Remainder => left % right,
-            VectorOperation.Distance => left.CalcDistance(right),
-            _ => throw new ArgumentOutOfRangeException(nameof(operation))
-        };
 
         internal static void Equal(IEnumerable<double> expected, IMathVector actual)
         {
