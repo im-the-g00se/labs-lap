@@ -2,6 +2,7 @@
 **/obj/
 **/TestResults/
 .vs/
+7vscode/
 .idea/
 *.user
 *.suo
