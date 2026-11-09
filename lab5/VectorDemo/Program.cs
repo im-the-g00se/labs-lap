@@ -79,11 +79,9 @@ namespace VectorDemo
             ShowExpectedError<ArithmeticException>("a.MultiplyNumber(double.MaxValue): переполнение", () => first.MultiplyNumber(double.MaxValue));
 
             Console.WriteLine();
-            Console.WriteLine("Продолжение после ошибок: исходные векторы сохранены");
             ShowVector("a", first);
             ShowVector("b", second);
             ShowVector("a.Sum(b)", first.Sum(second));
-            Console.WriteLine("Демонстрация завершена.");
         }
 
         private static void ShowVector(string label, IMathVector vector)
